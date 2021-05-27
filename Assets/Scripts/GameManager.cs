@@ -5,6 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
 using System;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -13,8 +14,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField] GameObject counterPanel;
     [SerializeField] Text counterDisplay;
     float countDownToStartGame;
-    bool startCounter;
     [SerializeField] GameObject limitScenario;
+
+    [SerializeField] GameObject winScreen, looseScreen;
 
     GameState currentState;
 
@@ -34,12 +36,22 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             CountDownToStartGame();
         }
+        else if (currentState == GameState.InGame)
+        {
+            CheckforWinOrLoose();
+        }
+    }
+
+    private void CheckforWinOrLoose()
+    {
+        //Chequear quien gana y quien pierde
+        //Si algun player colisiono, mostrarles los carteles de win y loose.
     }
 
     private void CountDownToStartGame()
     {
         countDownToStartGame -= Time.deltaTime;
-        counterDisplay.text = countDownToStartGame.ToString();
+        counterDisplay.text = countDownToStartGame.ToString("00:00");
         if (countDownToStartGame <= 0)
         {
             counterPanel.SetActive(false);
@@ -56,6 +68,24 @@ public class GameManager : MonoBehaviourPunCallbacks
             currentState = GameState.CountDown;
             counterPanel.SetActive(true);
         }
+    }
+
+    public void ActiveLooseScreen()
+    {
+        looseScreen.SetActive(true);
+        Invoke("GoBackToMenu", 5);
+    }
+
+    public void ActiveWinScreen()
+    {
+        winScreen.SetActive(true);
+        Invoke("GoBackToMenu", 5);
+    }
+
+    //Called From Btn
+    public void GoBackToMenu()
+    {
+        SceneManager.LoadScene(0); 
     }
 
 }

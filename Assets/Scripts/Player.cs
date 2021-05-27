@@ -13,9 +13,12 @@ public class Player : MonoBehaviour
     Rigidbody rb;
     float shootCoolDown;
     public bool imSecondPlayer;
-
+    GameManager gameManager;
+    bool winOrLoosePanelShowed;
     void Start()
     {
+        gameManager = FindObjectOfType<GameManager>();
+
         if (PhotonNetwork.PlayerList.Length > 1)
         {
             imSecondPlayer = true;
@@ -43,8 +46,6 @@ public class Player : MonoBehaviour
         GetComponent<Material>().color = Color.blue;
     }
 
-
-
     void Update()
     {
         if (!photonView.IsMine) return;
@@ -56,13 +57,8 @@ public class Player : MonoBehaviour
 
     private void Aim()
     {
-        //Get the Screen positions of the object
         Vector2 positionOnScreen = Camera.main.WorldToViewportPoint(transform.position);
-
-        //Get the Screen position of the mouse
         Vector2 mouseOnScreen = (Vector2)Camera.main.ScreenToViewportPoint(Input.mousePosition);
-
-        //Get the angle between the points
         float angle = AngleBetweenTwoPoints(positionOnScreen, mouseOnScreen);
 
         if (!imSecondPlayer)
@@ -71,7 +67,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            transform.rotation = Quaternion.Euler(new Vector3(0f, (-angle) -90, 0f));
+            transform.rotation = Quaternion.Euler(new Vector3(0f, (-angle) - 90, 0f));
         }
 
     }
@@ -83,14 +79,11 @@ public class Player : MonoBehaviour
 
     private void Attack()
     {
-
         if (Input.GetMouseButtonUp(0) && shootCoolDown <= 0)
         {
             PhotonNetwork.Instantiate("Bullet", bulletSpawnPosition.transform.position, transform.rotation);
             shootCoolDown += 0.3f;
         }
-
-        
     }
 
     void Reloading()
@@ -115,5 +108,33 @@ public class Player : MonoBehaviour
     public void RPCChangeColor(float r, float g, float b)
     {
         GetComponent<Material>().color = new Color(r, g, b);
+    }
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.GetComponent<DeadColliders>())
+        {
+            if (!winOrLoosePanelShowed)
+            {
+                DeadScreen();
+                winOrLoosePanelShowed = true;
+            }
+        }
+    }
+
+    void DeadScreen()
+    {
+
+        if (photonView.IsMine)
+        {
+            gameManager.ActiveLooseScreen();
+            Debug.Log("Active loose panel");
+        }
+        else
+        {
+            gameManager.ActiveWinScreen();
+            Debug.Log("Active Win panel");
+        }
     }
 }
