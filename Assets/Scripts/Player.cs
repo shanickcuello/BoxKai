@@ -125,7 +125,6 @@ public class Player : MonoBehaviour
 
     void DeadScreen()
     {
-
         if (photonView.IsMine)
         {
             gameManager.ActiveLooseScreen();
